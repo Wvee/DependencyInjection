@@ -1,34 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DependencyInjection.Models
 {
     public class MemoryRepository : IRepository
     {
-        private Dictionary<string, Product> _products;
+        private IModelStorage storage;
+        private string guid = System.Guid.NewGuid().ToString();
 
-        public MemoryRepository()
+        public MemoryRepository(IModelStorage modelStore)
         {
-            _products = new Dictionary<string, Product>();
+            storage = modelStore;
+
+
+
             new List<Product>
             {
                 new Product{Name="Kite",Price=275m},
                 new Product{Name="Lifejacket",Price=48.95m},
                 new Product{Name="Soccerball",Price=19.5m},
-            }.ForEach(p=>AddProduct(p));
+            }.ForEach(p => AddProduct(p));
         }
-        public IEnumerable<Product> Products => _products.Values;
-        public Product this[string name] => _products[name];
 
-        public void AddProduct(Product product)=>
-             _products[product.Name] = product;
+        public IEnumerable<Product> Products => storage.Items;
+        public Product this[string name] => storage[name];
 
+        public void AddProduct(Product product)
+        {
+            storage[product.Name] = product;
+        }
 
-        public void DeleteProduct(Product product)=>
-            _products.Remove(product.Name);
-
-
+        public void DeleteProduct(Product product)
+        {
+            storage.RemoveItem(product.Name);
+        }
+        public override string ToString()
+        {
+            return guid;
+        }
     }
 }
